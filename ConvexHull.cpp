@@ -19,6 +19,14 @@ void print(const Points & ps)
     cout << endl;
 }
 
+void print(const Hull & hull)
+{
+    cout << "lower hull: ";
+    print(hull.first);
+    cout << "upper hull: ";
+    print(hull.second);
+}
+
 // Alphabetical sort
 Points asort(const Points & ps)
 {
@@ -136,6 +144,9 @@ int main()
     
     Points ps2 = asort(ps);
     print(ps2);
+
+    Hull hull = andrew(ps);
+    print(hull);
 
     return 0;
 }
