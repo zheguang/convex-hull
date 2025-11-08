@@ -21,9 +21,9 @@ void print(const Points & ps)
 
 void print(const Hull & hull)
 {
-    cout << "lower hull: ";
+    cout << "## lower hull: ";
     print(hull.first);
-    cout << "upper hull: ";
+    cout << "## upper hull: ";
     print(hull.second);
 }
 
@@ -80,21 +80,19 @@ Hull andrew(const Points & ps_unsorted)
     {
         auto pi = ps.begin();
         Points res;
-        for (int i = 0; i < 2; i++)
-            res.push_back(*pi++);
-
         while (pi != ps.end())
         {
+            /// Minimum hull
+            if (res.size() < 2)
+            {
+                res.push_back(*pi++);
+                continue;
+            }
+
             int t = turn(res[res.size() - 2], res.back(), *pi);
             /// Right turn
             if (t < 0)
-            {
-                /// Minimum hull
-                if (ps.size() < 2)
-                    res.push_back(*pi++);
-                else
-                    res.pop_back();
-            }
+                res.pop_back();
             /// No turn
             else if (t == 0)
                 res.back() = *pi++;
@@ -109,21 +107,19 @@ Hull andrew(const Points & ps_unsorted)
     {
         auto pi = ps.rbegin();
         Points res;
-        for (int i = 0; i < 2; i++)
-            res.push_back(*pi++);
-
         while (pi != ps.rend())
         {
+            /// Minimum hull
+            if (res.size() < 2)
+            {
+                res.push_back(*pi++);
+                continue;
+            }
+
             int t = turn(res[res.size() - 2], res.back(), *pi);
             /// Right turn
             if (t < 0)
-            {
-                /// Minimum hull
-                if (ps.size() < 2)
-                    res.push_back(*pi++);
-                else
-                    res.pop_back();
-            }
+                res.pop_back();
             /// No turn
             else if (t == 0)
                 res.back() = *pi++;
@@ -137,16 +133,70 @@ Hull andrew(const Points & ps_unsorted)
     return hull;
 }
 
+/// Tests
+void testOutput(const string & test, const Points & input)
+{
+    cout << endl << "# " << test << endl;
+    print(andrew(input));
+    cout << "---" << endl;
+}
+
+void testCases()
+{
+    /// 1. Empty or minimal sets
+    testOutput("Empty set", {});
+    testOutput("Single point", {{5, 5}});
+    testOutput("Two points", {{1, 1}, {3, 3}});
+    testOutput("Triangle (all on hull)", {{0, 0}, {2, 0}, {1, 2}});
+
+    /// 2. Collinear points
+    testOutput("Horizontal", {{1, 1}, {2, 1}, {3, 1}, {4, 1}});
+    testOutput("Vertical", {{2, 1}, {2, 2}, {2, 3}, {2, 4}});
+    testOutput("Diagonal", {{1, 1}, {2, 2}, {3, 3}, {4, 4}});
+
+    /// 3. Square/Rectangle:
+    testOutput("Square", {{0, 0}, {0, 4}, {4, 4}, {4, 0}});
+    testOutput("Rectangle", {{0, 0}, {0, 3}, {5, 3}, {5, 0}});
+
+    /// 4. Points with interior (some inside hull):
+    testOutput("With interior", {
+        {0, 0}, {4, 0}, {4, 4}, {0, 4},  /// Outer square
+        {2, 2}, {1, 1}, {3, 3}           /// Interior points
+    });
+
+    /// 5. Convex polygon (all points on hull):
+    testOutput("Hexagon", {{2, 0}, {4, 1}, {4, 3}, {2, 4}, {0, 3}, {0, 1}});
+
+    /// 6. Duplicate points:
+    testOutput("duplicates", {{1, 1}, {1, 1}, {3, 1}, {3, 3}, {1, 3}});
+
+    /// 7. Many collinear points on hull edge:
+    testOutput("edge_points", {
+        {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0},  /// Bottom edge
+        {4, 4}, {0, 4}                           /// Top corners
+    });
+    /// 8. Star pattern:
+    testOutput("star", {
+        {5, 0}, {6, 3}, {9, 3}, {7, 5}, {8, 8},  /// Outer points
+        {5, 6}, {2, 8}, {3, 5}, {1, 3}, {4, 3}   /// Inner points
+    });
+
+    /// 9. Pre-sorted points:
+    testOutput("sorted", {{0, 0}, {1, 1}, {2, 0}, {3, 1}, {4, 0}});
+    /// 10. Reverse sorted:
+    testOutput("reverse", {{5, 5}, {4, 4}, {3, 3}, {2, 2}, {1, 1}, {0, 0}});
+
+    /// 11. Shapes - all points on hull
+    testOutput("diamond", {{2, 0}, {4, 2}, {2, 4}, {0, 2}});
+    testOutput("l_shape", {{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}});
+
+    /// 12. Large coordinate values
+    testOutput("large", {{-1000, -1000}, {1000, -1000}, {1000, 1000}, {-1000, 1000}, {0, 0}});
+}
+
+
 int main()
 {
-    Points ps { {1, 2}, {2, 2}, {3, 2}, {2, 3}, {2, 1} };
-    print(ps);
-    
-    Points ps2 = asort(ps);
-    print(ps2);
-
-    Hull hull = andrew(ps);
-    print(hull);
-
+    testCases();
     return 0;
 }
